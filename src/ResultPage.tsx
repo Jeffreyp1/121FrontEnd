@@ -8,6 +8,7 @@ export default function ResultPage(){
     const urlParam = new URLSearchParams(location.search);
     const getQuery = urlParam.get('query') || '';
     const [data, setData] = useState<String[]>([]);
+    const [time, setTime] = useState(0)
     useEffect(()=>{
         let cache = localStorage.getItem(getQuery.toLowerCase())
         if(cache){
@@ -15,7 +16,7 @@ export default function ResultPage(){
             setData(jsonData)
             console.log("USING cache: ", jsonData)
         }else{
-            fetch(`http://127.0.0.1:5000/api/search?query=${encodeURIComponent(getQuery)}&top_n=${10}`)
+            fetch(`http://127.0.0.1:5000/api/search?query=${encodeURIComponent(getQuery)}&top_n=${56000}`)
             .then(resp =>{
                 if (resp.headers.get("content-type")?.includes("application/json")) {
                     return resp.json();
@@ -23,8 +24,9 @@ export default function ResultPage(){
                     throw new Error('Not a JSON response');
                 }
             })
-            .then((data)=>{
-                setData(data)
+            .then((val)=>{
+                setData(val[0])
+                setTime(val[1])
                 console.log("Setting cache", getQuery, data)
                 localStorage.setItem(getQuery, JSON.stringify(data))
             })
@@ -48,7 +50,11 @@ export default function ResultPage(){
                 <div className="pl-3 w-4/5 flex mx-auto">
                     <h1 className="text-gray-400">About {data.length} results</h1>
                 </div>
-        
+                <div className="pl-3 w-4/5 flex mx-auto">
+                    <h1 className="text-gray-400"> Time: {time}</h1>
+                </div>
+            
+
                 {data.map((val, index)=>(
                     <div className ="w-4/5 flex mx-auto">
                         <h5 className="flex text-xl justify-start p-3 text-white">{index + 1}.
@@ -59,7 +65,7 @@ export default function ResultPage(){
                             style={{color: '#86aef1'}}
                             onClick={(e)=>{
                             e.preventDefault()
-                            window.location.href=`http://${val}`}}
+                            window.location.href=`${val}`}}
                             >
                                 {val}
                             </a>
